@@ -248,8 +248,7 @@ class SourceControllerIT {
 
         String id = objectMapper
                 .readTree(createResponse)
-                .get("id")
-                .asText();
+                .get("id").asString();
 
         mockMvc.perform(put("/api/v1/sources/{id}", id)
                         .with(user("test-user").roles("USER"))
@@ -292,8 +291,7 @@ class SourceControllerIT {
 
         String id = objectMapper
                 .readTree(createResponse)
-                .get("id")
-                .asText();
+                .get("id").asString();
 
         mockMvc.perform(put("/api/v1/sources/{id}", id)
                         .with(user("test-user").roles("USER"))
@@ -383,8 +381,7 @@ class SourceControllerIT {
 
         String id = objectMapper
                 .readTree(createResponse)
-                .get("id")
-                .asText();
+                .get("id").asString();
 
         mockMvc.perform(put("/api/v1/sources/{id}", id)
                         .with(user("test-user").roles("USER"))

@@ -8,7 +8,6 @@ import fr.lab.iahomelab.source.controller.dto.UpdateSourceRequest;
 import fr.lab.iahomelab.source.entity.Source;
 import fr.lab.iahomelab.source.entity.SourceStatus;
 import fr.lab.iahomelab.source.repository.SourceRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
