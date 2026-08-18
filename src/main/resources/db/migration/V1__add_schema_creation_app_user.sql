@@ -14,9 +14,8 @@ CREATE TABLE app_user (
                           CONSTRAINT uk_app_user_username UNIQUE (username),
                           CONSTRAINT uk_app_user_email UNIQUE (email),
 
-                          CONSTRAINT chk_app_user_role CHECK (
-                              role IN ('USER', 'ADMIN')
-                              )
+                          CONSTRAINT chk_app_user_role
+                              CHECK (role IN ('USER', 'ADMIN'))
 );
 
 
@@ -25,13 +24,14 @@ CREATE TABLE user_identity (
 
                                user_id UUID NOT NULL,
 
-                               provider VARCHAR(30) NOT NULL,
-
+                               type VARCHAR(30) NOT NULL,
+                               provider VARCHAR(50) NOT NULL,
                                provider_subject VARCHAR(255) NOT NULL,
 
                                password_hash VARCHAR(255),
 
                                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                               updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
                                CONSTRAINT fk_user_identity_user
                                    FOREIGN KEY (user_id)
@@ -41,26 +41,23 @@ CREATE TABLE user_identity (
                                CONSTRAINT uk_user_identity_provider_subject
                                    UNIQUE (provider, provider_subject),
 
-                               CONSTRAINT chk_user_identity_provider CHECK (
-                                   provider IN (
-                                                'LOCAL',
-                                                'GOOGLE',
-                                                'GITHUB',
-                                                'MICROSOFT'
-                                       )
-                                   ),
+                               CONSTRAINT chk_user_identity_type
+                                   CHECK (
+                                       type IN ('LOCAL', 'OIDC', 'OAUTH2')
+                                       ),
 
-                               CONSTRAINT chk_user_identity_password CHECK (
-                                   (
-                                       provider = 'LOCAL'
-                                           AND password_hash IS NOT NULL
+                               CONSTRAINT chk_user_identity_password
+                                   CHECK (
+                                       (
+                                           type = 'LOCAL'
+                                               AND password_hash IS NOT NULL
+                                           )
+                                           OR
+                                       (
+                                           type <> 'LOCAL'
+                                               AND password_hash IS NULL
+                                           )
                                        )
-                                       OR
-                                   (
-                                       provider <> 'LOCAL'
-                                           AND password_hash IS NULL
-                                       )
-                                   )
 );
 
 CREATE INDEX idx_user_identity_user

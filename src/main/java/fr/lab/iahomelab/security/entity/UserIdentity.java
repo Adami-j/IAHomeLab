@@ -1,6 +1,7 @@
 package fr.lab.iahomelab.security.entity;
 
 
+import fr.lab.iahomelab.common.entity.BaseEntity;
 import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;
@@ -16,11 +17,7 @@ import java.util.UUID;
                 )
         }
 )
-public class UserIdentity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+public class UserIdentity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
@@ -28,7 +25,7 @@ public class UserIdentity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private AuthenticationProvider provider;
+    private IdentityType identityType;
 
     @Column(name = "provider_subject", nullable = false, length = 255)
     private String providerSubject;
@@ -36,11 +33,7 @@ public class UserIdentity {
     @Column(name = "password_hash", length = 255)
     private String passwordHash;
 
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
     protected UserIdentity() {
     }
 
-    // getters/setters
 }
