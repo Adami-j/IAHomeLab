@@ -3,11 +3,15 @@ package fr.lab.iahomelab.security.entity;
 
 import fr.lab.iahomelab.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
+@Getter
+@Setter
 @Table(
         name = "user_identity",
         uniqueConstraints = {
@@ -24,8 +28,11 @@ public class UserIdentity extends BaseEntity {
     private AppUser user;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    @Column(name = "type", nullable = false, length = 30)
     private IdentityType identityType;
+
+    @Column(nullable = false, length = 50)
+    private String provider;
 
     @Column(name = "provider_subject", nullable = false, length = 255)
     private String providerSubject;
@@ -34,6 +41,20 @@ public class UserIdentity extends BaseEntity {
     private String passwordHash;
 
     protected UserIdentity() {
+    }
+
+    public UserIdentity(
+            AppUser user,
+            IdentityType identityType,
+            String provider,
+            String providerSubject,
+            String passwordHash
+    ) {
+        this.user = user;
+        this.identityType = identityType;
+        this.provider = provider;
+        this.providerSubject = providerSubject;
+        this.passwordHash = passwordHash;
     }
 
 }

@@ -31,4 +31,17 @@ public class AppUser extends BaseEntity {
     protected AppUser() {
     }
 
+    public AppUser(
+            String username,
+            String email,
+            String displayName,
+            UserRole role
+    ) {
+        this.username = username;
+        this.email = email;
+        this.displayName = displayName;
+        this.role = role;
+        this.enabled = true;
+    }
+
 }
