@@ -111,6 +111,7 @@ class AuthControllerIT {
                 .getRequest()
                 .getSession(false);
 
+        assert session != null;
         mockMvc.perform(
                         get("/api/v1/auth/me")
                                 .session(

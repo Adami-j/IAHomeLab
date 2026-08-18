@@ -21,7 +21,7 @@ public class SecurityConfiguration {
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             DaoAuthenticationProvider authenticationProvider
-    ) throws Exception {
+    )  {
 
         http
                 .authenticationProvider(authenticationProvider)

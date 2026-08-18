@@ -7,6 +7,7 @@ import fr.lab.iahomelab.security.entity.UserRole;
 import fr.lab.iahomelab.security.repository.AppUserRepository;
 import fr.lab.iahomelab.security.repository.UserIdentityRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -30,6 +31,7 @@ public class InitialAdminService implements ApplicationRunner {
 
     @Override
     @Transactional
+    @NullMarked
     public void run(ApplicationArguments args) {
 
         if (appUserRepository.existsByRole(UserRole.ADMIN)) {
