@@ -1,9 +1,22 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    image: postgres:18.3
+    container_name: iahomelab-postgres
+    restart: unless-stopped
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      POSTGRES_DB: IAHomeLab
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
     ports:
-      - '5432'
+      - "5432:5432"
+    volumes:
+      - iahomelab_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d IAHomeLab"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  iahomelab_postgres_data:
