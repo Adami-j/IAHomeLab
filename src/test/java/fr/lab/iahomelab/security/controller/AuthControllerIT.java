@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -142,6 +143,41 @@ class AuthControllerIT {
     @Test
     void shouldRejectMeWithoutAuthentication() throws Exception {
         mockMvc.perform(get("/api/v1/auth/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldLogoutAndInvalidateAuthentication() throws Exception {
+
+        MvcResult loginResult = mockMvc.perform(
+                        post("/api/v1/auth/login")
+                                .with(csrf().asHeader())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                    {
+                                      "username": "admin",
+                                      "password": "test-password"
+                                    }
+                                    """)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpSession session =
+                (MockHttpSession) loginResult.getRequest().getSession(false);
+
+        assert session != null;
+        mockMvc.perform(
+                        post("/api/v1/auth/logout")
+                                .session(session)
+                                .with(csrf().asHeader())
+                )
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(
+                        get("/api/v1/auth/me")
+                                .session(session)
+                )
                 .andExpect(status().isUnauthorized());
     }
 }

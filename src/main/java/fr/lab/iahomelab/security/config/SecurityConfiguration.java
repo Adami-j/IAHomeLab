@@ -34,6 +34,12 @@ public class SecurityConfiguration {
                         .authenticationEntryPoint((request, response, exception) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
                         )
+
+                ).logout(logout -> logout
+                        .logoutUrl("/api/v1/auth/logout")
+                        .logoutSuccessHandler((request, response, authentication) ->
+                                response.setStatus(HttpServletResponse.SC_NO_CONTENT)
+                        )
                 );
 
         return http.build();
