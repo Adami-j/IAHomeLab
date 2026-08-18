@@ -12,4 +12,5 @@ public interface UserIdentityRepository extends JpaRepository<UserIdentity, UUID
             String provider,
             String providerSubject
     );
+
 }
