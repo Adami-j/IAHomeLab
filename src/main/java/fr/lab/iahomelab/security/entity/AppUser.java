@@ -15,10 +15,10 @@ public class AppUser extends BaseEntity {
     @Column(nullable = false, unique = true, length = 100)
     private String username;
 
-    @Column(unique = true, length = 255)
+    @Column(unique = true)
     private String email;
 
-    @Column(name = "display_name", length = 255)
+    @Column(name = "display_name")
     private String displayName;
 
     @Enumerated(EnumType.STRING)

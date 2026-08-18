@@ -24,6 +24,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
+    @SuppressWarnings("hidding exception")
     public ResponseEntity<ApiError> handleUnexpected(Exception exception) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
