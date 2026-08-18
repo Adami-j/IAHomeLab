@@ -4,6 +4,7 @@ import fr.lab.iahomelab.common.exception.ApiError;
 import fr.lab.iahomelab.common.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -44,6 +45,19 @@ public class GlobalExceptionHandler {
                 .body(new ApiError(
                         "INTERNAL_ERROR",
                         "An unexpected error occurred",
+                        OffsetDateTime.now()
+                ));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiError> handleBadCredentials(
+            BadCredentialsException ex
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiError(
+                        "INVALID_CREDENTIALS",
+                        "Invalid username or password",
                         OffsetDateTime.now()
                 ));
     }
