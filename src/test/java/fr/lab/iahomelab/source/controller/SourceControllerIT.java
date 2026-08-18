@@ -17,8 +17,7 @@ import java.util.UUID;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -31,6 +30,9 @@ class SourceControllerIT {
 
     @Autowired
     private SourceRepository sourceRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -157,5 +159,51 @@ class SourceControllerIT {
                                 }
                                 """))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldUpdateSource() throws Exception {
+        String createResponse = mockMvc.perform(post("/api/v1/sources")
+                        .with(user("test-user").roles("USER"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                              "title": "Original title",
+                              "url": "https://example.com/original",
+                              "type": "ARTICLE"
+                            }
+                            """))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String id = objectMapper
+                .readTree(createResponse)
+                .get("id").asString();
+
+        mockMvc.perform(put("/api/v1/sources/{id}", id)
+                        .with(user("test-user").roles("USER"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                              "title": "Updated title",
+                              "url": "https://example.com/updated",
+                              "type": "DOCUMENTATION",
+                              "status": "READ",
+                              "summary": "Updated summary",
+                              "notes": "Updated notes"
+                            }
+                            """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.title").value("Updated title"))
+                .andExpect(jsonPath("$.url").value("https://example.com/updated"))
+                .andExpect(jsonPath("$.type").value("DOCUMENTATION"))
+                .andExpect(jsonPath("$.status").value("READ"))
+                .andExpect(jsonPath("$.summary").value("Updated summary"))
+                .andExpect(jsonPath("$.notes").value("Updated notes"));
     }
 }

@@ -3,6 +3,7 @@ package fr.lab.iahomelab.source.controller;
 import fr.lab.iahomelab.common.api.ApiV1Controller;
 import fr.lab.iahomelab.source.controller.dto.CreateSourceRequest;
 import fr.lab.iahomelab.source.controller.dto.SourceResponse;
+import fr.lab.iahomelab.source.controller.dto.UpdateSourceRequest;
 import fr.lab.iahomelab.source.service.SourceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,4 +39,15 @@ public class SourceController {
                 sourceService.getById(id)
         );
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SourceResponse> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateSourceRequest request
+    ) {
+        return ResponseEntity.ok(
+                sourceService.update(id, request)
+        );
+    }
+
 }

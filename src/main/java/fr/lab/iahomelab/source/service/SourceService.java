@@ -4,9 +4,11 @@ import fr.lab.iahomelab.common.exception.InvalidRequestException;
 import fr.lab.iahomelab.common.exception.ResourceNotFoundException;
 import fr.lab.iahomelab.source.controller.dto.CreateSourceRequest;
 import fr.lab.iahomelab.source.controller.dto.SourceResponse;
+import fr.lab.iahomelab.source.controller.dto.UpdateSourceRequest;
 import fr.lab.iahomelab.source.entity.Source;
 import fr.lab.iahomelab.source.entity.SourceStatus;
 import fr.lab.iahomelab.source.repository.SourceRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,5 +80,34 @@ public class SourceService {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    @Transactional
+    public SourceResponse update(UUID id, UpdateSourceRequest request) {
+
+        Source source = sourceRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Source not found: " + id
+                        )
+                );
+
+        if (isBlank(request.url()) && isBlank(request.storagePath())) {
+            throw new InvalidRequestException(
+                    "A source must define either url or storagePath"
+            );
+        }
+
+        source.setTitle(request.title());
+        source.setUrl(request.url());
+        source.setStoragePath(request.storagePath());
+        source.setFileName(request.fileName());
+        source.setMimeType(request.mimeType());
+        source.setType(request.type());
+        source.setStatus(request.status());
+        source.setSummary(request.summary());
+        source.setNotes(request.notes());
+
+        return toResponse(sourceRepository.save(source));
     }
 }
