@@ -2,6 +2,7 @@ package fr.lab.iahomelab.security.config;
 
 import fr.lab.iahomelab.common.exception.ApiError;
 import fr.lab.iahomelab.common.exception.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.OffsetDateTime;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -27,7 +29,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiError> handleMethodNotSupported(
-            HttpRequestMethodNotSupportedException ex
     ) {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(new ApiError(
@@ -40,6 +41,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @SuppressWarnings("hidding exception")
     public ResponseEntity<ApiError> handleUnexpected(Exception exception) {
+        log.error("Unexpected error", exception);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiError(
@@ -51,7 +53,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiError> handleBadCredentials(
-            BadCredentialsException ex
     ) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
