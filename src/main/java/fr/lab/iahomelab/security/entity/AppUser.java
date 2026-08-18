@@ -1,22 +1,16 @@
 package fr.lab.iahomelab.security.entity;
 
 
+import fr.lab.iahomelab.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "app_user")
-public class AppUser {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+public class AppUser extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 100)
     private String username;
@@ -34,14 +28,7 @@ public class AppUser {
     @Column(nullable = false)
     private boolean enabled = true;
 
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
     protected AppUser() {
     }
 
-    // getters/setters
 }
