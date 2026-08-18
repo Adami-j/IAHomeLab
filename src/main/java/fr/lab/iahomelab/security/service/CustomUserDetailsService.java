@@ -4,6 +4,7 @@ import fr.lab.iahomelab.security.entity.AppUser;
 import fr.lab.iahomelab.security.entity.UserIdentity;
 import fr.lab.iahomelab.security.repository.UserIdentityRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,6 +18,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserIdentityRepository userIdentityRepository;
 
     @Override
+    @NullMarked
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
