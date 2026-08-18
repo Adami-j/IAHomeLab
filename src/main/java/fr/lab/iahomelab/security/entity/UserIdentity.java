@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -34,10 +32,10 @@ public class UserIdentity extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String provider;
 
-    @Column(name = "provider_subject", nullable = false, length = 255)
+    @Column(name = "provider_subject", nullable = false)
     private String providerSubject;
 
-    @Column(name = "password_hash", length = 255)
+    @Column(name = "password_hash")
     private String passwordHash;
 
     protected UserIdentity() {
