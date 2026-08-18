@@ -1,5 +1,6 @@
 package fr.lab.iahomelab.source.service;
 
+import fr.lab.iahomelab.common.exception.InvalidRequestException;
 import fr.lab.iahomelab.common.exception.ResourceNotFoundException;
 import fr.lab.iahomelab.source.controller.dto.CreateSourceRequest;
 import fr.lab.iahomelab.source.controller.dto.SourceResponse;
@@ -22,7 +23,7 @@ public class SourceService {
     public SourceResponse create(CreateSourceRequest request) {
 
         if (isBlank(request.url()) && isBlank(request.storagePath())) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "A source must define either url or storagePath"
             );
         }

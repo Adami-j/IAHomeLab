@@ -1,7 +1,5 @@
-package fr.lab.iahomelab.security.config;
+package fr.lab.iahomelab.common.exception;
 
-import fr.lab.iahomelab.common.exception.ApiError;
-import fr.lab.iahomelab.common.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +57,19 @@ public class GlobalExceptionHandler {
                 .body(new ApiError(
                         "INVALID_CREDENTIALS",
                         "Invalid username or password",
+                        OffsetDateTime.now()
+                ));
+    }
+
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ApiError> handleInvalidRequest(
+            InvalidRequestException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ApiError(
+                        "INVALID_REQUEST",
+                        exception.getMessage(),
                         OffsetDateTime.now()
                 ));
     }
