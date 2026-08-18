@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -119,8 +118,7 @@ class SourceControllerIT {
 
         String id = new ObjectMapper()
                 .readTree(response)
-                .get("id")
-                .asText();
+                .get("id").asString();
 
         mockMvc.perform(get("/api/v1/sources/{id}", id).with(user("test-user").roles("USER")).with(csrf()))
                 .andExpect(status().isOk())
