@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.UUID;
 
 @Service
@@ -45,6 +46,11 @@ public class SourceService {
         );
         source.setSummary(request.summary());
         source.setNotes(request.notes());
+        source.setTags(
+                request.tags() != null
+                        ? new HashSet<>(request.tags())
+                        : new HashSet<>()
+        );
 
         return toResponse(sourceRepository.save(source));
     }
@@ -74,7 +80,8 @@ public class SourceService {
                 source.getSummary(),
                 source.getNotes(),
                 source.getCreatedAt(),
-                source.getUpdatedAt()
+                source.getUpdatedAt(),
+                source.getTags()
         );
     }
 
@@ -107,6 +114,12 @@ public class SourceService {
         source.setStatus(request.status());
         source.setSummary(request.summary());
         source.setNotes(request.notes());
+
+        source.getTags().clear();
+
+        if (request.tags() != null) {
+            source.getTags().addAll(request.tags());
+        }
 
         return toResponse(sourceRepository.save(source));
     }

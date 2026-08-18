@@ -4,6 +4,7 @@ import fr.lab.iahomelab.source.entity.SourceStatus;
 import fr.lab.iahomelab.source.entity.SourceType;
 
 import java.time.OffsetDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 public record SourceResponse(
@@ -18,6 +19,7 @@ public record SourceResponse(
         String summary,
         String notes,
         OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        OffsetDateTime updatedAt,
+        Set<String> tags
 ) {
 }

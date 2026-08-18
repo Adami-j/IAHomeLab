@@ -7,6 +7,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -48,5 +51,13 @@ public class Source extends BaseEntity {
 
     @Column(name = "notes", columnDefinition = "text")
     private String notes;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "source_tag",
+            joinColumns = @JoinColumn(name = "source_id")
+    )
+    @Column(name = "tag", nullable = false, length = 100)
+    private Set<String> tags = new HashSet<>();
 
 }
