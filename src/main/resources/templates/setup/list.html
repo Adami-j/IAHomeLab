@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout('Setups', ~{::main})}">
+<main>
+    <section class="page-section">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Setups</p>
+                <h2>Systèmes IA</h2>
+            </div>
+            <button class="button button-primary" type="button">Nouveau setup</button>
+        </div>
+
+        <div class="panel empty-state">
+            <p>La liste réelle sera branchée sur `SetupService` dans une étape suivante.</p>
+        </div>
+    </section>
+</main>
+</html>
