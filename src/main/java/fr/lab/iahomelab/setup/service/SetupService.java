@@ -48,8 +48,9 @@ public class SetupService {
 
         String setupName = setup.name();
         String setupDescription = setup.description();
+        UUID setupId = setup.id();
 
-        Setup newSetup = new Setup();
+
 
         if(setup.name() == null || setup.name().isBlank()){
             throw new InvalidRequestException("A setup must have a name");
@@ -57,14 +58,17 @@ public class SetupService {
 
         List<Setup> listSetup = setupRepository.findByNameEqualsAndIdEquals(setupName,setup.id());
 
-        if(!listSetup.isEmpty()){
+        if(!listSetup.isEmpty() && !listSetup.get(0).getId().equals(setupId)){
             throw new InvalidRequestException("A setup with this name already exists");
         }
 
-        newSetup.setName(setupName);
-        newSetup.setDescription(setupDescription);
+        Setup updateSetup = setupRepository.findById(setupId).orElseThrow();
 
-        Setup setupUpdated =  setupRepository.saveAndFlush(newSetup);
+
+        updateSetup.setName(setupName);
+        updateSetup.setDescription(setupDescription);
+
+        Setup setupUpdated =  setupRepository.saveAndFlush(updateSetup);
 
         return toResponse(setupUpdated);
 
