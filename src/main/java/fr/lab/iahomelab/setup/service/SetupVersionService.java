@@ -1,5 +1,6 @@
 package fr.lab.iahomelab.setup.service;
 
+import fr.lab.iahomelab.setup.repository.SetupRepository;
 import fr.lab.iahomelab.setup.repository.SetupVersionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,4 +10,5 @@ import org.springframework.stereotype.Service;
 public class SetupVersionService {
 
     private final SetupVersionRepository setupVersionRepository;
+    private final SetupRepository setupRepository;
 }
