@@ -1,13 +1,17 @@
 package fr.lab.iahomelab.setup.service;
 
 import fr.lab.iahomelab.common.exception.InvalidRequestException;
+import fr.lab.iahomelab.common.exception.ResourceNotFoundException;
 import fr.lab.iahomelab.setup.controller.dto.CreateSetupRequest;
 import fr.lab.iahomelab.setup.controller.dto.SetupResponse;
 import fr.lab.iahomelab.setup.controller.dto.UpdateSetupRequest;
 import fr.lab.iahomelab.setup.entity.Setup;
+import fr.lab.iahomelab.setup.entity.SetupVersionStatus;
 import fr.lab.iahomelab.setup.repository.SetupRepository;
+import fr.lab.iahomelab.setup.repository.SetupVersionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,74 +21,73 @@ import java.util.UUID;
 public class SetupService {
 
     private final SetupRepository setupRepository;
+    private final SetupVersionRepository setupVersionRepository;
 
-    public SetupResponse create(CreateSetupRequest setup){
+    @Transactional
+    public SetupResponse create(CreateSetupRequest request) {
+        validateName(request.name());
 
-        String setupName = setup.name();
-        String setupDescription = setup.description();
+        Setup setup = new Setup();
+        setup.setName(request.name());
+        setup.setDescription(request.description());
 
-        Setup newSetup = new Setup();
+        return toResponse(setupRepository.save(setup));
+    }
 
-        if(setup.name() == null || setup.name().isBlank()){
+    @Transactional(readOnly = true)
+    public SetupResponse getById(UUID id) {
+        return toResponse(findSetup(id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<SetupResponse> list() {
+        return setupRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional
+    public SetupResponse update(UUID id, UpdateSetupRequest request) {
+        validateName(request.name());
+
+        Setup setup = findSetup(id);
+        setup.setName(request.name());
+        setup.setDescription(request.description());
+
+        return toResponse(setupRepository.save(setup));
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        Setup setup = findSetup(id);
+
+        if (setupVersionRepository.existsBySetupIdAndStatus(id, SetupVersionStatus.FROZEN)) {
+            throw new InvalidRequestException(
+                    "A setup with a frozen version cannot be deleted"
+            );
+        }
+
+        setupRepository.delete(setup);
+    }
+
+    private Setup findSetup(UUID id) {
+        return setupRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Setup not found: " + id)
+                );
+    }
+
+    private void validateName(String name) {
+        if (name == null || name.isBlank()) {
             throw new InvalidRequestException("A setup must have a name");
         }
-
-        List<Setup> listSetup = setupRepository.findByNameEquals(setupName);
-
-        if(!listSetup.isEmpty()){
-            throw new InvalidRequestException("A setup with this name already exists");
-        }
-
-        newSetup.setName(setupName);
-        newSetup.setDescription(setupDescription);
-
-       Setup setupGenerated =  setupRepository.saveAndFlush(newSetup);
-
-        return toResponse(setupGenerated);
-
-
     }
-    public SetupResponse update(UpdateSetupRequest setup){
-
-        String setupName = setup.name();
-        String setupDescription = setup.description();
-        UUID setupId = setup.id();
-
-
-
-        if(setup.name() == null || setup.name().isBlank()){
-            throw new InvalidRequestException("A setup must have a name");
-        }
-
-        List<Setup> listSetup = setupRepository.findByNameEqualsAndIdEquals(setupName,setup.id());
-
-        if(!listSetup.isEmpty() && !listSetup.get(0).getId().equals(setupId)){
-            throw new InvalidRequestException("A setup with this name already exists");
-        }
-
-        Setup updateSetup = setupRepository.findById(setupId).orElseThrow();
-
-
-        updateSetup.setName(setupName);
-        updateSetup.setDescription(setupDescription);
-
-        Setup setupUpdated =  setupRepository.saveAndFlush(updateSetup);
-
-        return toResponse(setupUpdated);
-
-
-    }
-
-    public void delete(UUID id){
-        if(!setupRepository.existsById(id)){
-            throw new InvalidRequestException("A setup with this id does not exist");
-        }
-        setupRepository.deleteById(id);
-    }
-
 
     private SetupResponse toResponse(Setup setup) {
-        return new SetupResponse(setup.getId(),setup.getName(), setup.getDescription() );
+        return new SetupResponse(
+                setup.getId(),
+                setup.getName(),
+                setup.getDescription()
+        );
     }
-
 }
