@@ -1,0 +1,19 @@
+/*
+ * Les couleurs restent volontairement isolées des tokens structurels.
+ * La charte finale pourra évoluer sans toucher aux espacements, composants ou layouts.
+ */
+
+[data-theme="lab"] {
+    --color-bg: #0d1117;
+    --color-bg-elevated: #131a24;
+    --color-panel: #171f2b;
+    --color-panel-strong: #1d2836;
+    --color-border: #2a394b;
+    --color-text: #edf4fb;
+    --color-text-muted: #93a6ba;
+    --color-accent: #66e3c4;
+    --color-accent-strong: #2ec9a3;
+    --color-accent-contrast: #07120f;
+    --color-danger: #ff7b72;
+    --color-warning: #e8bf63;
+}
