@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout('Setup workspace', ~{::main})}">
+<main>
+    <section class="workspace-grid">
+        <div class="workspace-canvas panel">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Setup version</p>
+                    <h2>Graph workspace</h2>
+                </div>
+                <span class="badge">DRAFT</span>
+            </div>
+
+            <div class="graph-placeholder">
+                Le graphe des `ComponentInstance` et `Connection` sera rendu ici.
+            </div>
+        </div>
+
+        <aside class="workspace-inspector panel">
+            <p class="eyebrow">Inspector</p>
+            <h3>Aucun composant sélectionné</h3>
+            <p class="muted">Sélectionner un nœud permettra d'afficher et d'éditer sa configuration.</p>
+        </aside>
+    </section>
+</main>
+</html>
