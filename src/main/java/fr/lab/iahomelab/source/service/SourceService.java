@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -56,14 +57,63 @@ public class SourceService {
 
     @Transactional(readOnly = true)
     public SourceResponse getById(UUID id) {
-        Source source = sourceRepository.findById(id)
+        return toResponse(findSource(id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<SourceResponse> list() {
+        return sourceRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional
+    public SourceResponse update(UUID id, UpdateSourceRequest request) {
+
+        Source source = findSource(id);
+
+        if (isBlank(request.url()) && isBlank(request.storagePath())) {
+            throw new InvalidRequestException(
+                    "A source must define either url or storagePath"
+            );
+        }
+
+        source.setTitle(request.title());
+        source.setUrl(request.url());
+        source.setStoragePath(request.storagePath());
+        source.setFileName(request.fileName());
+        source.setMimeType(request.mimeType());
+        source.setType(request.type());
+        source.setStatus(
+                request.status() != null
+                        ? request.status()
+                        : SourceStatus.TO_READ
+        );
+        source.setSummary(request.summary());
+        source.setNotes(request.notes());
+
+        source.getTags().clear();
+
+        if (request.tags() != null) {
+            source.getTags().addAll(request.tags());
+        }
+
+        return toResponse(sourceRepository.save(source));
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        Source source = findSource(id);
+        sourceRepository.delete(source);
+    }
+
+    private Source findSource(UUID id) {
+        return sourceRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Source not found: " + id
                         )
                 );
-
-        return toResponse(source);
     }
 
     private SourceResponse toResponse(Source source) {
@@ -86,40 +136,5 @@ public class SourceService {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
-    }
-
-    @Transactional
-    public SourceResponse update(UUID id, UpdateSourceRequest request) {
-
-        Source source = sourceRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Source not found: " + id
-                        )
-                );
-
-        if (isBlank(request.url()) && isBlank(request.storagePath())) {
-            throw new InvalidRequestException(
-                    "A source must define either url or storagePath"
-            );
-        }
-
-        source.setTitle(request.title());
-        source.setUrl(request.url());
-        source.setStoragePath(request.storagePath());
-        source.setFileName(request.fileName());
-        source.setMimeType(request.mimeType());
-        source.setType(request.type());
-        source.setStatus(request.status());
-        source.setSummary(request.summary());
-        source.setNotes(request.notes());
-
-        source.getTags().clear();
-
-        if (request.tags() != null) {
-            source.getTags().addAll(request.tags());
-        }
-
-        return toResponse(sourceRepository.save(source));
     }
 }
