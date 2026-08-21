@@ -5,6 +5,8 @@ import fr.lab.iahomelab.setup.controller.dto.CreateSetupRequest;
 import fr.lab.iahomelab.setup.controller.dto.CreateSetupVersionRequest;
 import fr.lab.iahomelab.setup.controller.dto.SetupResponse;
 import fr.lab.iahomelab.setup.controller.dto.SetupVersionResponse;
+import fr.lab.iahomelab.setup.controller.dto.UpdateSetupRequest;
+import fr.lab.iahomelab.setup.controller.dto.UpdateSetupVersionRequest;
 import fr.lab.iahomelab.setup.service.ComponentInstanceService;
 import fr.lab.iahomelab.setup.service.ConnectionService;
 import fr.lab.iahomelab.setup.service.SetupService;
@@ -63,6 +65,35 @@ public class SetupPageController {
         return "setup/detail";
     }
 
+    @GetMapping("/{setupId}/edit")
+    public String editForm(
+            @PathVariable UUID setupId,
+            Model model
+    ) {
+        model.addAttribute("setup", setupService.getById(setupId));
+        return "setup/edit";
+    }
+
+    @PostMapping("/{setupId}/edit")
+    public String update(
+            @PathVariable UUID setupId,
+            @RequestParam String name,
+            @RequestParam(required = false) String description
+    ) {
+        setupService.update(
+                setupId,
+                new UpdateSetupRequest(name, normalize(description))
+        );
+
+        return "redirect:/app/setups/" + setupId;
+    }
+
+    @PostMapping("/{setupId}/delete")
+    public String delete(@PathVariable UUID setupId) {
+        setupService.delete(setupId);
+        return "redirect:/app/setups";
+    }
+
     @PostMapping("/{setupId}/versions")
     public String createVersion(
             @PathVariable UUID setupId,
@@ -76,6 +107,43 @@ public class SetupPageController {
         return "redirect:/app/setups/" + setupId + "/versions/" + version.id();
     }
 
+    @PostMapping("/{setupId}/versions/{versionId}/update")
+    public String updateVersion(
+            @PathVariable UUID setupId,
+            @PathVariable UUID versionId,
+            @RequestParam(required = false) String description
+    ) {
+        findVersionForSetup(setupId, versionId);
+        setupVersionService.update(
+                versionId,
+                new UpdateSetupVersionRequest(normalize(description))
+        );
+
+        return "redirect:/app/setups/" + setupId + "/versions/" + versionId;
+    }
+
+    @PostMapping("/{setupId}/versions/{versionId}/freeze")
+    public String freezeVersion(
+            @PathVariable UUID setupId,
+            @PathVariable UUID versionId
+    ) {
+        findVersionForSetup(setupId, versionId);
+        setupVersionService.freeze(versionId);
+
+        return "redirect:/app/setups/" + setupId + "/versions/" + versionId;
+    }
+
+    @PostMapping("/{setupId}/versions/{versionId}/delete")
+    public String deleteVersion(
+            @PathVariable UUID setupId,
+            @PathVariable UUID versionId
+    ) {
+        findVersionForSetup(setupId, versionId);
+        setupVersionService.delete(versionId);
+
+        return "redirect:/app/setups/" + setupId;
+    }
+
     @GetMapping("/{setupId}/versions/{versionId}")
     public String workspace(
             @PathVariable UUID setupId,
@@ -83,6 +151,17 @@ public class SetupPageController {
             Model model
     ) {
         SetupResponse setup = setupService.getById(setupId);
+        SetupVersionResponse version = findVersionForSetup(setupId, versionId);
+
+        model.addAttribute("setup", setup);
+        model.addAttribute("version", version);
+        model.addAttribute("components", componentInstanceService.list(versionId));
+        model.addAttribute("connections", connectionService.list(versionId));
+
+        return "setup/workspace";
+    }
+
+    private SetupVersionResponse findVersionForSetup(UUID setupId, UUID versionId) {
         SetupVersionResponse version = setupVersionService.getById(versionId);
 
         if (!version.setupId().equals(setupId)) {
@@ -91,12 +170,7 @@ public class SetupPageController {
             );
         }
 
-        model.addAttribute("setup", setup);
-        model.addAttribute("version", version);
-        model.addAttribute("components", componentInstanceService.list(versionId));
-        model.addAttribute("connections", connectionService.list(versionId));
-
-        return "setup/workspace";
+        return version;
     }
 
     private String normalize(String value) {
