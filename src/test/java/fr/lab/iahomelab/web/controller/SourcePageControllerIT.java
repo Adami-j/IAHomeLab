@@ -1,10 +1,12 @@
 package fr.lab.iahomelab.web.controller;
 
 import fr.lab.iahomelab.config.PostgresTestConfiguration;
+import fr.lab.iahomelab.source.controller.dto.SourceResponse;
 import fr.lab.iahomelab.source.entity.Source;
 import fr.lab.iahomelab.source.entity.SourceStatus;
 import fr.lab.iahomelab.source.entity.SourceType;
 import fr.lab.iahomelab.source.repository.SourceRepository;
+import fr.lab.iahomelab.source.service.SourceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,9 @@ class SourcePageControllerIT {
 
     @Autowired
     private SourceRepository sourceRepository;
+
+    @Autowired
+    private SourceService sourceService;
 
     @BeforeEach
     void setUp() {
@@ -82,8 +87,9 @@ class SourcePageControllerIT {
 
         assertThat(sourceRepository.count()).isEqualTo(1);
         Source source = sourceRepository.findAll().get(0);
-        assertThat(source.getTitle()).isEqualTo("Spring AI");
-        assertThat(source.getTags()).containsExactlyInAnyOrder("spring", "ai");
+        SourceResponse response = sourceService.getById(source.getId());
+        assertThat(response.title()).isEqualTo("Spring AI");
+        assertThat(response.tags()).containsExactlyInAnyOrder("spring", "ai");
     }
 
     @Test
@@ -101,11 +107,11 @@ class SourcePageControllerIT {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/app/research"));
 
-        Source updated = sourceRepository.findById(source.getId()).orElseThrow();
-        assertThat(updated.getTitle()).isEqualTo("Updated");
-        assertThat(updated.getType()).isEqualTo(SourceType.PAPER);
-        assertThat(updated.getStatus()).isEqualTo(SourceStatus.READ);
-        assertThat(updated.getTags()).containsExactlyInAnyOrder("rag", "evaluation");
+        SourceResponse updated = sourceService.getById(source.getId());
+        assertThat(updated.title()).isEqualTo("Updated");
+        assertThat(updated.type()).isEqualTo(SourceType.PAPER);
+        assertThat(updated.status()).isEqualTo(SourceStatus.READ);
+        assertThat(updated.tags()).containsExactlyInAnyOrder("rag", "evaluation");
     }
 
     @Test
