@@ -38,6 +38,7 @@ public class SourcePageController {
     public String createForm(Model model) {
         populateFormOptions(model);
         model.addAttribute("editing", false);
+        model.addAttribute("formAction", "/app/research");
         return "source/form";
     }
 
@@ -79,6 +80,7 @@ public class SourcePageController {
         model.addAttribute("source", source);
         model.addAttribute("tagsValue", String.join(", ", source.tags()));
         model.addAttribute("editing", true);
+        model.addAttribute("formAction", "/app/research/" + sourceId + "/edit");
         populateFormOptions(model);
         return "source/form";
     }
