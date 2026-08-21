@@ -13,7 +13,7 @@
         </div>
 
         <form class="panel form-stack"
-              th:action="${editing} ? @{/app/research/{id}/edit(id=${source.id})} : @{/app/research}"
+              th:action="${formAction}"
               method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
