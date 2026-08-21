@@ -8,11 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/app")
 public class NavigationPageController {
 
-    @GetMapping("/research")
-    public String research() {
-        return "pages/research";
-    }
-
     @GetMapping("/experiments")
     public String experiments() {
         return "pages/experiments";
