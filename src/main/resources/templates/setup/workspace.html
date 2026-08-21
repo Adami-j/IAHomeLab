@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr"
       xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(${setup.name} + ' · v' + ${version.versionNumber}, ~{::main})}">
+      th:replace="~{layouts/app :: layout(${setup.name + ' · v' + version.versionNumber}, ~{::main})}">
 <main>
     <section class="page-section">
         <div class="section-heading">
