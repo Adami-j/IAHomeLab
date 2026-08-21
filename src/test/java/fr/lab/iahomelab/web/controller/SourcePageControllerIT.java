@@ -63,7 +63,7 @@ class SourcePageControllerIT {
                 .andExpect(redirectedUrl("/app/research"));
 
         assertThat(sourceRepository.count()).isEqualTo(1);
-        Source source = sourceRepository.findAll().getFirst();
+        Source source = sourceRepository.findAll().get(0);
         assertThat(source.getTitle()).isEqualTo("Spring AI");
         assertThat(source.getTags()).containsExactlyInAnyOrder("spring", "ai");
     }
