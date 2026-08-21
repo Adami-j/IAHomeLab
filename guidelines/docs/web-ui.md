@@ -2,76 +2,83 @@
 
 ## Objectif
 
-La première interface web d'IAHomeLab doit permettre de travailler rapidement sur l'UX et la charte graphique sans introduire immédiatement une toolchain Node/NPM.
+La première interface web d'IAHomeLab sert à construire et valider l'UX sans introduire de toolchain Node/NPM.
 
-La stack retenue pour cette phase est :
+Stack retenue :
 
 ```text
 Spring Boot
 ├── Spring MVC
 ├── Thymeleaf
-├── HTMX           (ajouté lorsqu'une interaction en a besoin)
 ├── JavaScript vanilla
 ├── CSS maison
-└── Cytoscape.js   (plus tard pour le graphe Setup)
+├── HTMX          (plus tard, uniquement pour des interactions ciblées)
+└── Cytoscape.js  (plus tard, pour le graphe Setup)
 ```
 
-Le build reste uniquement Maven :
+Le build reste Maven uniquement :
 
 ```bash
 mvn spring-boot:run
 mvn clean verify
 ```
 
-Il n'y a pas de `package.json`, `node_modules`, Vite, Webpack ou autre bundler frontend.
+Pas de `package.json`, `node_modules`, Vite ou Webpack pendant cette phase.
 
 ---
 
-## Principe d'architecture
+## Architecture
 
-L'API REST existante reste indépendante de l'interface web.
+L'interface HTML ne remplace pas l'API REST.
 
 ```text
                          ┌───────────────────────┐
-                         │  REST Controllers     │
-                         │  /api/v1/**           │
-                         │  JSON                 │
+                         │ REST Controllers      │
+                         │ /api/v1/**            │
+                         │ JSON                  │
                          └───────────┬───────────┘
                                      │
-Browser / future SPA ────────────────┤
-                                     │
-                         ┌───────────▼───────────┐
-                         │      Services         │
-                         │ logique métier        │
-                         └───────────▲───────────┘
-                                     │
+Future SPA / clients API ────────────┤
+                                     ▼
+                              Services métier
+                                     ▲
 Browser actuel ──────────────────────┤
                          ┌───────────┴───────────┐
-                         │ MVC Page Controllers  │
+                         │ MVC Controllers       │
                          │ /app/**               │
                          │ Thymeleaf / HTML      │
                          └───────────────────────┘
 ```
 
-Les contrôleurs MVC ne remplacent pas les contrôleurs REST. Ils utilisent les mêmes services métier et produisent des pages ou fragments HTML.
+Règle :
 
-Cette séparation permet de remplacer plus tard Thymeleaf par React, Vue, Svelte ou une autre SPA sans réécrire le backend métier ni l'API `/api/v1`.
+```text
+Web Controller
+      ↓
+Service métier
+      ↓
+Repository
+      ↓
+PostgreSQL
+```
+
+La logique métier ne doit pas être dupliquée dans les contrôleurs MVC, Thymeleaf ou JavaScript.
 
 ---
 
-## Organisation du code
+## Organisation des fichiers
 
 ```text
 src/main/java/fr/lab/iahomelab/
-├── setup/
 ├── source/
-├── sourceidea/
+├── setup/
 └── web/
     └── controller/
         ├── HomePageController.java
         ├── LoginPageController.java
         ├── NavigationPageController.java
         ├── SessionPageController.java
+        ├── SourcePageController.java
         └── SetupPageController.java
 
 src/main/resources/
@@ -84,12 +91,15 @@ src/main/resources/
 │   ├── pages/
 │   │   ├── home.html
 │   │   ├── login.html
-│   │   ├── research.html
 │   │   ├── experiments.html
 │   │   └── findings.html
+│   ├── source/
+│   │   ├── list.html
+│   │   └── form.html
 │   └── setup/
 │       ├── list.html
 │       ├── new.html
+│       ├── edit.html
 │       ├── detail.html
 │       └── workspace.html
 │
@@ -106,55 +116,11 @@ src/main/resources/
         └── README.md
 ```
 
-Le package `web` contient uniquement la présentation MVC. La logique métier reste dans les services des modules existants.
-
-```text
-Web Controller
-      ↓
-Service métier
-      ↓
-Repository
-      ↓
-PostgreSQL
-```
-
----
-
-## Routes
-
-### API JSON
-
-```text
-/api/v1/**
-```
-
-### Interface HTML
-
-```text
-GET  /login
-POST /login
-GET  /app
-GET  /app/research
-GET  /app/setups
-GET  /app/setups/new
-POST /app/setups
-GET  /app/setups/{setupId}
-POST /app/setups/{setupId}/versions
-GET  /app/setups/{setupId}/versions/{versionId}
-GET  /app/experiments
-GET  /app/findings
-POST /app/logout
-```
-
-`Research`, `Experiments` et `Findings` sont actuellement des pages accessibles mais restent des écrans d'attente tant que leurs fonctions métier ne sont pas branchées.
-
-La section `Setups` est déjà branchée sur les services existants : liste, création, versions et ouverture du workspace.
-
 ---
 
 ## Navigation
 
-La sidebar est la navigation principale :
+Sidebar :
 
 ```text
 Home
@@ -164,146 +130,193 @@ Experiments
 Findings
 ```
 
-Une entrée affichée doit toujours conduire vers une route réelle. Les `href="#"` sont à éviter : si une feature n'est pas encore disponible, elle mène vers un écran d'attente explicite.
+Une entrée visible doit conduire vers une vraie route. Pas de `href="#"` pour les actions principales.
+
+`Experiments` et `Findings` restent des pages d'attente tant que leurs features métier ne sont pas implémentées.
 
 ---
 
 ## Authentification navigateur
 
-L'interface HTML utilise le même compte local que l'API avec un formulaire Spring Security.
+Le navigateur utilise le même compte local que l'API, mais via `formLogin` Spring Security.
 
 ```text
-GET /app
-   ↓ anonyme
+GET /app sans session
+        ↓
 302 /login
-   ↓
+        ↓
 POST /login + CSRF
-   ↓
+        ↓
 session HTTP authentifiée
-   ↓
+        ↓
 302 /app
 ```
 
-Le compte utilisé est celui créé au bootstrap avec :
+Le compte local vient du bootstrap :
 
 ```text
 IAHL_INITIAL_USERNAME
 IAHL_INITIAL_PASSWORD
 ```
 
-Le comportement reste différent selon le client :
+Comportement attendu :
 
 ```text
 /api/** sans authentification  → 401
-/app/** sans authentification  → redirection /login
+/app/** sans authentification  → 302 /login
 ```
 
-### Déconnexion
-
-La topbar expose un bouton `Déconnexion` qui envoie :
+Déconnexion navigateur :
 
 ```text
 POST /app/logout + CSRF
+        ↓
+session invalidée
+        ↓
+302 /login?logout
+```
+
+L'endpoint REST `/api/v1/auth/logout` reste séparé.
+
+---
+
+## Research / Sources
+
+La page `Research` est maintenant la vue de gestion des `Source`.
+
+Routes HTML :
+
+```text
+GET  /app/research
+GET  /app/research/new
+POST /app/research
+GET  /app/research/{sourceId}/edit
+POST /app/research/{sourceId}/edit
+POST /app/research/{sourceId}/delete
+```
+
+Flux de création :
+
+```text
+Nouvelle source
+      ↓
+formulaire Thymeleaf
+      ↓
+SourcePageController
+      ↓
+SourceService.create(...)
+      ↓
+PostgreSQL
+      ↓
+redirect /app/research
+```
+
+Le formulaire supporte :
+
+```text
+title
+url ou storagePath
+type
+status
+fileName
+mimeType
+summary
+notes
+tags
+```
+
+Les tags sont saisis sous forme de liste séparée par des virgules puis convertis en `Set<String>` côté contrôleur MVC.
+
+L'API REST dispose aussi de la liste et de la suppression :
+
+```text
+GET    /api/v1/sources
+DELETE /api/v1/sources/{id}
+```
+
+---
+
+## Setups
+
+Routes HTML :
+
+```text
+GET  /app/setups
+GET  /app/setups/new
+POST /app/setups
+GET  /app/setups/{setupId}
+GET  /app/setups/{setupId}/edit
+POST /app/setups/{setupId}/edit
+POST /app/setups/{setupId}/delete
 ```
 
 Flux :
 
 ```text
-clic Déconnexion
-      ↓
-POST /app/logout
-      ↓
-SecurityContextLogoutHandler
-      ↓
-session invalidée et contexte de sécurité nettoyé
-      ↓
-302 /login?logout
+liste
+  ↓
+création / ouverture
+  ↓
+détail du Setup
+  ├── modifier
+  ├── supprimer
+  └── gérer les versions
 ```
 
-L'endpoint JSON `/api/v1/auth/logout` reste séparé et inchangé.
-
----
-
-## Rendu d'une page
+La suppression suit la règle métier existante :
 
 ```text
-GET /app
-   ↓
-HomePageController
-   ↓
-return "pages/home"
-   ↓
-Thymeleaf
-   ↓
-layouts/app.html
-   ├── fragments/sidebar.html
-   ├── fragments/topbar.html
-   └── pages/home.html
-   ↓
-HTML envoyé au navigateur
+Setup sans version FROZEN  → suppression possible
+Setup avec version FROZEN  → suppression interdite
 ```
 
-Le layout contient la structure commune à toutes les pages.
+La règle reste appliquée par `SetupService`, pas par le template.
 
 ---
 
-## CSS et charte graphique
+## SetupVersion
 
-Les styles sont séparés selon leur responsabilité :
+Routes HTML :
 
 ```text
-tokens.css       → dimensions, espaces, rayons, typo
-       +
-themes.css       → couleurs / identité
-       +
-components.css   → boutons, panels, cards, formulaires
-       +
-layout.css       → sidebar, topbar, workspace
+POST /app/setups/{setupId}/versions
+GET  /app/setups/{setupId}/versions/{versionId}
+POST /app/setups/{setupId}/versions/{versionId}/update
+POST /app/setups/{setupId}/versions/{versionId}/freeze
+POST /app/setups/{setupId}/versions/{versionId}/delete
 ```
 
-La palette actuelle reste une base de travail tant qu'elle n'est pas explicitement validée.
-
----
-
-## HTMX
-
-HTMX n'est pas nécessaire pour les premières pages. Il sera introduit lorsqu'une interaction mérite d'éviter un rechargement complet.
-
-Exemple futur :
+Cycle UX :
 
 ```text
-clic sur Freeze
-      ↓
-HTMX POST
-      ↓
-Spring MVC
-      ↓
-SetupVersionService.freeze(...)
-      ↓
-fragment HTML
-      ↓
-HTMX remplace uniquement la zone concernée
+création
+   ↓
+DRAFT
+├── description modifiable
+├── suppression possible
+├── composants / connexions modifiables
+└── action "Figer"
+        ↓
+      FROZEN
+      └── consultation uniquement
 ```
 
-Les bibliothèques navigateur seront stockées dans `static/vendor/`. Aucun NPM n'est nécessaire.
-
----
-
-## CSRF et session
-
-La sécurité reste basée sur la session HTTP Spring Security et CSRF.
-
-Les formulaires Thymeleaf de login, création de setup, création de version et déconnexion incluent le token CSRF.
-
-Le layout expose aussi le token dans des balises `meta` pour les futures requêtes HTMX.
-
-On ne désactive pas CSRF pour simplifier le frontend.
+Le navigateur ne recrée aucune règle métier : `SetupVersionService` décide si une version peut être modifiée, figée ou supprimée.
 
 ---
 
 ## Setup Workspace
 
-Le workspace `SetupVersion` est le premier écran métier important.
+Le workspace charge :
+
+```text
+Setup
+SetupVersion
+ComponentInstance[]
+Connection[]
+```
+
+Structure cible :
 
 ```text
 ┌─────────────┬────────────────────────────────┬─────────────────┐
@@ -316,48 +329,53 @@ Le workspace `SetupVersion` est le premier écran métier important.
 └─────────────┴────────────────────────────────┴─────────────────┘
 ```
 
-Le workspace charge maintenant depuis les services :
-
-```text
-Setup
-SetupVersion
-ComponentInstance[]
-Connection[]
-```
-
-Le rendu reste simple tant que l'édition visuelle du graphe n'est pas conçue.
-
-Règles UX :
-
-- le graphe est le centre de l'expérience ;
-- les formulaires servent le graphe, pas l'inverse ;
-- une version `DRAFT` est éditable ;
-- une version `FROZEN` devient visuellement read-only ;
-- l'inspecteur latéral porte les détails du composant sélectionné ;
-- les listes CRUD restent des vues secondaires.
+Pour l'instant, le workspace affiche les composants existants et le nombre de connexions. L'édition visuelle du graphe viendra après validation de l'UX.
 
 ---
 
-## Graphe interactif
+## CSRF
 
-Lorsque les besoins seront clairs, Cytoscape.js pourra être ajouté dans `static/vendor/`.
+Toutes les actions HTML mutantes utilisent `POST` et transmettent le token CSRF Thymeleaf :
+
+```html
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+```
+
+Le layout expose aussi le token dans des balises `meta` pour les futures requêtes HTMX.
+
+CSRF ne doit pas être désactivé pour simplifier l'UI.
+
+---
+
+## CSS
+
+Responsabilités :
 
 ```text
-ComponentInstanceResponse[]
-ConnectionResponse[]
-       ↓
-JavaScript
-       ↓
-Cytoscape.js
-       ↓
-graphe interactif
+tokens.css       → espacements, rayons, tailles, typo
+themes.css       → couleurs et identité visuelle
+base.css         → styles HTML globaux
+layout.css       → sidebar, topbar, zones d'écran
+components.css   → boutons, panels, cards, formulaires, badges
 ```
+
+La palette actuelle reste provisoire jusqu'à validation explicite de la charte.
+
+---
+
+## HTMX et Cytoscape
+
+HTMX sera ajouté uniquement quand un rechargement partiel apporte un vrai gain UX.
+
+Cytoscape.js sera ajouté uniquement lorsque le graphe Setup deviendra interactif.
+
+Les bibliothèques navigateur seront placées dans `static/vendor/` avec une version explicite. Aucun NPM n'est requis.
 
 ---
 
 ## Tests
 
-Les tests MVC utilisent :
+Les tests MVC suivent la stratégie du projet :
 
 ```text
 @SpringBootTest
@@ -365,19 +383,20 @@ Les tests MVC utilisent :
 @Import(PostgresTestConfiguration.class)
 ```
 
-Ils couvrent progressivement :
+Ils couvrent notamment :
 
-- redirection anonyme vers `/login` ;
-- login navigateur ;
-- navigation sidebar ;
-- logout navigateur ;
-- rendu de la liste Setup ;
-- création d'un Setup par formulaire ;
-- détail d'un Setup ;
-- ouverture d'un workspace ;
-- CSRF sur les actions mutantes.
+```text
+login / logout
+redirection anonyme
+navigation
+création / modification / suppression de Source
+création / modification / suppression de Setup
+création / modification / freeze / suppression de SetupVersion
+rendu du workspace
+CSRF sur les mutations
+```
 
-Les tests REST restent séparés des tests de pages MVC.
+Les tests REST restent séparés des tests MVC.
 
 ---
 
@@ -388,9 +407,7 @@ Aujourd'hui :
 ```text
 Browser
   ↓
-Thymeleaf / HTMX
-  ↓
-Spring MVC
+Thymeleaf / MVC
   ↓
 Services
 ```
@@ -407,7 +424,7 @@ REST Controllers
 Services
 ```
 
-Les services, repositories, entités et API REST restent inchangés.
+Les services, repositories, entités et contrats REST restent réutilisables.
 
 ---
 
@@ -418,9 +435,10 @@ Les services, repositories, entités et API REST restent inchangés.
 3. Pas d'entités JPA directement dans les templates.
 4. Réutiliser les services et DTOs existants.
 5. Garder `/api/v1/**` indépendant de `/app/**`.
-6. Ajouter HTMX uniquement pour une interaction concrète.
-7. Ajouter Cytoscape uniquement quand le graphe devient interactif.
-8. Garder les couleurs dans `themes.css`.
-9. Garder les dimensions et espacements dans `tokens.css`.
-10. Ne pas afficher de lien ou bouton principal qui ne mène nulle part.
-11. Valider l'UX avant de multiplier les écrans.
+6. Toutes les mutations HTML restent protégées par CSRF.
+7. Ajouter HTMX uniquement pour une interaction concrète.
+8. Ajouter Cytoscape uniquement quand le graphe devient interactif.
+9. Garder les couleurs dans `themes.css`.
+10. Garder dimensions et espacements dans `tokens.css`.
+11. Ne pas afficher de bouton principal sans comportement réel.
+12. Valider l'UX avant de multiplier les écrans.
