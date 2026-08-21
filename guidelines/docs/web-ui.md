@@ -70,7 +70,8 @@ src/main/java/fr/lab/iahomelab/
 ├── sourceidea/
 └── web/
     └── controller/
-        └── HomePageController.java
+        ├── HomePageController.java
+        └── LoginPageController.java
 
 src/main/resources/
 ├── templates/
@@ -80,7 +81,8 @@ src/main/resources/
 │   │   ├── sidebar.html
 │   │   └── topbar.html
 │   ├── pages/
-│   │   └── home.html
+│   │   ├── home.html
+│   │   └── login.html
 │   └── setup/
 │       ├── list.html
 │       └── workspace.html
@@ -91,7 +93,7 @@ src/main/resources/
     │   ├── themes.css           # couleurs / identité visuelle
     │   ├── base.css             # reset et styles HTML globaux
     │   ├── layout.css           # sidebar, topbar, workspace
-    │   └── components.css       # boutons, panels, badges, etc.
+    │   └── components.css       # boutons, panels, badges, formulaires
     ├── js/
     │   └── app.js               # JS global et intégration CSRF/HTMX
     └── vendor/
@@ -139,13 +141,16 @@ Exemples :
 ### Interface HTML
 
 ```text
+/login
 /app/**
 ```
 
-La première route créée est :
+Les premières routes créées sont :
 
 ```text
-GET /app
+GET  /login
+POST /login
+GET  /app
 ```
 
 Les routes prévues ensuite sont par exemple :
@@ -155,6 +160,59 @@ GET /app/setups
 GET /app/setups/{setupId}
 GET /app/setups/{setupId}/versions/{versionId}
 ```
+
+---
+
+## Connexion navigateur
+
+L'API garde son endpoint JSON existant :
+
+```text
+POST /api/v1/auth/login
+```
+
+L'interface HTML utilise en parallèle le mécanisme `formLogin` de Spring Security :
+
+```text
+GET /app sans session
+        ↓
+Spring Security
+        ↓
+302 /login
+        ↓
+GET /login
+        ↓
+formulaire Thymeleaf
+        ↓
+POST /login + CSRF
+        ↓
+DaoAuthenticationProvider
+        ↓
+CustomUserDetailsService
+        ↓
+session HTTP créée
+        ↓
+302 /app
+```
+
+Le formulaire utilise les mêmes identifiants locaux que l'API. Le premier compte est celui créé au bootstrap via :
+
+```text
+IAHL_INITIAL_USERNAME
+IAHL_INITIAL_PASSWORD
+IAHL_INITIAL_EMAIL
+```
+
+Les ressources statiques nécessaires à la page de connexion (`/css/**`, `/js/**`, `/vendor/**`) sont publiques, mais les pages `/app/**` restent authentifiées.
+
+Le comportement d'erreur reste volontairement différent selon le type de client :
+
+```text
+/api/** sans authentification  → 401
+/app/** sans authentification  → redirection /login
+```
+
+Cela permet de conserver le contrat REST existant tout en ayant une navigation navigateur normale.
 
 ---
 
@@ -198,7 +256,7 @@ spacing
 radius
 font families
 largeurs
-ombres de colonnes
+nombres de colonnes
 transitions
 ```
 
@@ -264,9 +322,9 @@ Les bibliothèques navigateur seront stockées dans `static/vendor/` avec une ve
 
 La sécurité actuelle reste basée sur la session HTTP Spring Security et CSRF.
 
-Les pages Thymeleaf peuvent accéder au token CSRF fourni par Spring Security.
+Le formulaire HTML de connexion transmet explicitement le token CSRF fourni par Spring Security.
 
-Le layout expose le token dans des balises `meta` :
+Les autres pages Thymeleaf peuvent également accéder au token CSRF. Le layout expose le token dans des balises `meta` :
 
 ```html
 <meta name="_csrf" ...>
@@ -282,11 +340,11 @@ Spring Security
       ↓
 CSRF token
       ↓
-Thymeleaf meta tags
+Thymeleaf
       ↓
-app.js
+formulaire HTML ou meta tags
       ↓
-HTMX request header
+POST / HTMX request
       ↓
 Spring Security valide la mutation
 ```
@@ -350,7 +408,7 @@ Cytoscape ne doit être ajouté qu'au moment où l'on commence réellement l'éd
 
 La stratégie reste identique au reste du projet.
 
-Les tests MVC utiliseront :
+Les tests MVC utilisent :
 
 ```text
 @SpringBootTest
@@ -358,9 +416,12 @@ Les tests MVC utiliseront :
 @Import(PostgresTestConfiguration.class)
 ```
 
-Ils devront contrôler au minimum :
+Ils doivent contrôler au minimum :
 
 - accès authentifié aux pages ;
+- redirection d'un navigateur anonyme vers `/login` ;
+- maintien du `401` sur les endpoints API protégés ;
+- authentification réelle via le formulaire HTML ;
 - rendu des templates ;
 - données injectées dans les modèles ;
 - actions mutantes avec CSRF ;
