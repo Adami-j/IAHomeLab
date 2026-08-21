@@ -13,7 +13,18 @@
                     Description
                 </p>
             </div>
-            <a class="button button-secondary" th:href="@{/app/setups}">Retour</a>
+
+            <div class="button-row">
+                <a class="button button-secondary" th:href="@{/app/setups}">Retour</a>
+                <a class="button button-secondary"
+                   th:href="@{/app/setups/{id}/edit(id=${setup.id})}">Modifier</a>
+                <form th:if="${canDeleteSetup}"
+                      th:action="@{/app/setups/{id}/delete(id=${setup.id})}"
+                      method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="button button-danger" type="submit">Supprimer</button>
+                </form>
+            </div>
         </div>
 
         <section class="panel">
@@ -22,30 +33,51 @@
                     <p class="eyebrow">Versions</p>
                     <h3>Historique du setup</h3>
                 </div>
-
-                <form th:action="@{/app/setups/{id}/versions(id=${setup.id})}" method="post">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button class="button button-primary" type="submit">Nouvelle version</button>
-                </form>
             </div>
+
+            <form class="version-create-form"
+                  th:action="@{/app/setups/{id}/versions(id=${setup.id})}"
+                  method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input class="input"
+                       type="text"
+                       name="description"
+                       maxlength="500"
+                       placeholder="Description de la nouvelle version (optionnel)">
+                <button class="button button-primary" type="submit">Nouvelle version</button>
+            </form>
 
             <div class="empty-state compact-empty-state" th:if="${#lists.isEmpty(versions)}">
                 <p>Aucune version. Crée la première version pour ouvrir le workspace.</p>
             </div>
 
             <div class="version-list" th:unless="${#lists.isEmpty(versions)}">
-                <a class="version-row"
-                   th:each="version : ${versions}"
-                   th:href="@{/app/setups/{setupId}/versions/{versionId}(setupId=${setup.id}, versionId=${version.id})}">
-                    <div>
-                        <strong th:text="${'Version ' + version.versionNumber}">Version 1</strong>
-                        <p class="muted"
-                           th:text="${version.description != null ? version.description : 'Aucune description'}">
-                            Description
-                        </p>
+                <article class="version-row" th:each="version : ${versions}">
+                    <a class="version-row-main"
+                       th:href="@{/app/setups/{setupId}/versions/{versionId}(setupId=${setup.id}, versionId=${version.id})}">
+                        <div>
+                            <strong th:text="${'Version ' + version.versionNumber}">Version 1</strong>
+                            <p class="muted"
+                               th:text="${version.description != null ? version.description : 'Aucune description'}">
+                                Description
+                            </p>
+                        </div>
+                        <span class="badge" th:text="${version.status}">DRAFT</span>
+                    </a>
+
+                    <div class="version-row-actions" th:if="${version.status.name() == 'DRAFT'}">
+                        <form th:action="@{/app/setups/{setupId}/versions/{versionId}/freeze(setupId=${setup.id}, versionId=${version.id})}"
+                              method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="button button-secondary" type="submit">Figer</button>
+                        </form>
+                        <form th:action="@{/app/setups/{setupId}/versions/{versionId}/delete(setupId=${setup.id}, versionId=${version.id})}"
+                              method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="button button-danger" type="submit">Supprimer</button>
+                        </form>
                     </div>
-                    <span class="badge" th:text="${version.status}">DRAFT</span>
-                </a>
+                </article>
             </div>
         </section>
     </section>
