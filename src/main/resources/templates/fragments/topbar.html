@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="topbar" th:fragment="topbar(pageTitle)">
+    <div>
+        <p class="eyebrow">IAHomeLab</p>
+        <h1 class="page-title" th:text="${pageTitle}">Page</h1>
+    </div>
+
+    <form class="topbar-actions" th:action="@{/app/logout}" method="post">
+        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button class="button button-secondary" type="submit">Déconnexion</button>
+    </form>
+</header>
+</body>
+</html>

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @ApiV1Controller
@@ -29,6 +30,11 @@ public class SourceController {
         return ResponseEntity
                 .created(URI.create("/api/v1/sources/" + source.id()))
                 .body(source);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SourceResponse>> list() {
+        return ResponseEntity.ok(sourceService.list());
     }
 
     @GetMapping("/{id}")
@@ -50,4 +56,9 @@ public class SourceController {
         );
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        sourceService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

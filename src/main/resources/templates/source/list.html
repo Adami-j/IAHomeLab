@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout('Research', ~{::main})}">
+<main>
+    <section class="page-section">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Research</p>
+                <h2>Sources</h2>
+                <p class="muted">Articles, papers, documentations et autres ressources à explorer.</p>
+            </div>
+            <a class="button button-primary" th:href="@{/app/research/new}">Nouvelle source</a>
+        </div>
+
+        <div class="panel empty-state" th:if="${#lists.isEmpty(sources)}">
+            <div>
+                <h3>Aucune source</h3>
+                <p>Ajoute une première ressource pour démarrer ta veille.</p>
+            </div>
+        </div>
+
+        <div class="card-list" th:unless="${#lists.isEmpty(sources)}">
+            <article class="panel resource-card" th:each="source : ${sources}">
+                <div class="resource-card-main">
+                    <div class="resource-card-meta">
+                        <span class="badge" th:text="${source.type}">PAPER</span>
+                        <span class="badge badge-muted" th:text="${source.status}">TO_READ</span>
+                    </div>
+                    <h3 th:text="${source.title}">Source</h3>
+                    <p class="muted"
+                       th:if="${source.summary != null}"
+                       th:text="${source.summary}">Résumé</p>
+                    <a class="text-link"
+                       th:if="${source.url != null}"
+                       th:href="${source.url}"
+                       target="_blank"
+                       rel="noreferrer">
+                        Ouvrir la source ↗
+                    </a>
+                    <code class="muted"
+                          th:if="${source.url == null and source.storagePath != null}"
+                          th:text="${source.storagePath}">path</code>
+                </div>
+
+                <div class="resource-card-actions">
+                    <a class="button button-secondary"
+                       th:href="@{/app/research/{id}/edit(id=${source.id})}">Modifier</a>
+                    <form th:action="@{/app/research/{id}/delete(id=${source.id})}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button class="button button-danger" type="submit">Supprimer</button>
+                    </form>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+</html>

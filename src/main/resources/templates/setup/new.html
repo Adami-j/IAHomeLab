@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout('Nouveau setup', ~{::main})}">
+<main>
+    <section class="page-section narrow-section">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Setups</p>
+                <h2>Nouveau setup</h2>
+            </div>
+            <a class="button button-secondary" th:href="@{/app/setups}">Annuler</a>
+        </div>
+
+        <form class="panel form-stack" th:action="@{/app/setups}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <label class="field">
+                <span>Nom</span>
+                <input class="input" type="text" name="name" maxlength="200" required autofocus>
+            </label>
+
+            <label class="field">
+                <span>Description</span>
+                <textarea class="input textarea" name="description" maxlength="500" rows="5"></textarea>
+            </label>
+
+            <div class="form-actions">
+                <button class="button button-primary" type="submit">Créer le setup</button>
+            </div>
+        </form>
+    </section>
+</main>
+</html>

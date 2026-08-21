@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside class="sidebar" th:fragment="sidebar">
+    <a class="brand" th:href="@{/app}">IAHomeLab</a>
+
+    <nav class="sidebar-nav" aria-label="Navigation principale">
+        <a class="nav-link" th:href="@{/app}">Home</a>
+        <a class="nav-link" th:href="@{/app/research}">Research</a>
+        <a class="nav-link" th:href="@{/app/setups}">Setups</a>
+        <a class="nav-link" th:href="@{/app/experiments}">Experiments</a>
+        <a class="nav-link" th:href="@{/app/findings}">Findings</a>
+    </nav>
+</aside>
+</body>
+</html>
