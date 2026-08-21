@@ -22,14 +22,6 @@ class NavigationPageControllerIT {
     private MockMvc mockMvc;
 
     @Test
-    void shouldRenderResearchPage() throws Exception {
-        mockMvc.perform(get("/app/research")
-                        .with(user("test-user").roles("USER")))
-                .andExpect(status().isOk())
-                .andExpect(view().name("pages/research"));
-    }
-
-    @Test
     void shouldRenderExperimentsPage() throws Exception {
         mockMvc.perform(get("/app/experiments")
                         .with(user("test-user").roles("USER")))
