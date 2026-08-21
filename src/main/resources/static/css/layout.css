@@ -47,11 +47,17 @@
 .topbar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
     min-height: 5rem;
     padding: var(--space-4) var(--space-6);
     border-bottom: 1px solid var(--color-border);
     background: rgb(13 17 23 / 0.86);
     backdrop-filter: blur(14px);
+}
+
+.topbar-actions {
+    margin-left: auto;
 }
 
 .page-title {
@@ -70,6 +76,10 @@
     gap: var(--space-5);
 }
 
+.narrow-section {
+    max-width: 48rem;
+}
+
 .section-heading {
     display: flex;
     align-items: center;
@@ -81,7 +91,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
     gap: var(--space-5);
-    min-height: calc(100vh - 8rem);
+    min-height: calc(100vh - 12rem);
 }
 
 .workspace-canvas,
@@ -118,5 +128,15 @@
 
     .workspace-grid {
         grid-template-columns: 1fr;
+    }
+
+    .topbar,
+    .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .topbar-actions {
+        margin-left: 0;
     }
 }
