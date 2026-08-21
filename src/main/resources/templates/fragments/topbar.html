@@ -6,6 +6,11 @@
         <p class="eyebrow">IAHomeLab</p>
         <h1 class="page-title" th:text="${pageTitle}">Page</h1>
     </div>
+
+    <form class="topbar-actions" th:action="@{/app/logout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button class="button button-secondary" type="submit">Déconnexion</button>
+    </form>
 </header>
 </body>
 </html>
