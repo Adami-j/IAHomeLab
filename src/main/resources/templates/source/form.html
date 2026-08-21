@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr"
       xmlns:th="http://www.thymeleaf.org"
-      th:with="pageTitle=${editing ? 'Modifier la source' : 'Nouvelle source'}"
-      th:replace="~{layouts/app :: layout(${pageTitle}, ~{::main})}">
+      th:replace="~{layouts/app :: layout(${editing ? 'Modifier la source' : 'Nouvelle source'}, ~{::main})}">
 <main>
     <section class="page-section narrow-section">
         <div class="section-heading">
