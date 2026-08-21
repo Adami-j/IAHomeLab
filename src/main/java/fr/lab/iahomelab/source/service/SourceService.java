@@ -84,11 +84,9 @@ public class SourceService {
         source.setFileName(request.fileName());
         source.setMimeType(request.mimeType());
         source.setType(request.type());
-        source.setStatus(
-                request.status() != null
-                        ? request.status()
-                        : SourceStatus.TO_READ
-        );
+        if (request.status() != null) {
+            source.setStatus(request.status());
+        }
         source.setSummary(request.summary());
         source.setNotes(request.notes());
 
@@ -130,7 +128,7 @@ public class SourceService {
                 source.getNotes(),
                 source.getCreatedAt(),
                 source.getUpdatedAt(),
-                source.getTags()
+                new HashSet<>(source.getTags())
         );
     }
 
