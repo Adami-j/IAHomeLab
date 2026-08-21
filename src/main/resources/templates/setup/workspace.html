@@ -16,7 +16,7 @@
             <div class="workspace-canvas panel">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow" th:text="|'Version ' + ${version.versionNumber}|">Version</p>
+                        <p class="eyebrow" th:text="${'Version ' + version.versionNumber}">Version</p>
                         <h3>Graph workspace</h3>
                     </div>
                     <span class="badge" th:text="${version.status}">DRAFT</span>
