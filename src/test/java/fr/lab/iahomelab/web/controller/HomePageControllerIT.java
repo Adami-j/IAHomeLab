@@ -37,6 +37,6 @@ class HomePageControllerIT {
     void shouldRedirectAnonymousUserToLoginPage() throws Exception {
         mockMvc.perform(get("/app"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("http://localhost/login"));
+                .andExpect(redirectedUrl("/login"));
     }
 }
