@@ -50,6 +50,24 @@ class SourcePageControllerIT {
     }
 
     @Test
+    void shouldRenderSourceCreateAndEditForms() throws Exception {
+        Source source = saveSource("Editable", "https://example.com/editable");
+
+        mockMvc.perform(get("/app/research/new")
+                        .with(user("test-user").roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("source/form"))
+                .andExpect(content().string(containsString("Créer la source")));
+
+        mockMvc.perform(get("/app/research/{sourceId}/edit", source.getId())
+                        .with(user("test-user").roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("source/form"))
+                .andExpect(content().string(containsString("Editable")))
+                .andExpect(content().string(containsString("Enregistrer")));
+    }
+
+    @Test
     void shouldCreateSourceFromHtmlForm() throws Exception {
         mockMvc.perform(post("/app/research")
                         .with(user("test-user").roles("USER"))
