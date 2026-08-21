@@ -9,11 +9,30 @@
                 <p class="eyebrow">Setups</p>
                 <h2>Systèmes IA</h2>
             </div>
-            <button class="button button-primary" type="button">Nouveau setup</button>
+            <a class="button button-primary" th:href="@{/app/setups/new}">Nouveau setup</a>
         </div>
 
-        <div class="panel empty-state">
-            <p>La liste réelle sera branchée sur `SetupService` dans une étape suivante.</p>
+        <div class="panel empty-state" th:if="${#lists.isEmpty(setups)}">
+            <div>
+                <h3>Aucun setup</h3>
+                <p>Créer un premier système pour commencer à versionner son architecture.</p>
+            </div>
+        </div>
+
+        <div class="card-list" th:unless="${#lists.isEmpty(setups)}">
+            <a class="panel setup-card"
+               th:each="setup : ${setups}"
+               th:href="@{/app/setups/{id}(id=${setup.id})}">
+                <div>
+                    <p class="eyebrow">Setup</p>
+                    <h3 th:text="${setup.name}">Nom du setup</h3>
+                    <p class="muted"
+                       th:text="${setup.description != null ? setup.description : 'Aucune description'}">
+                        Description
+                    </p>
+                </div>
+                <span class="setup-card-action">Ouvrir →</span>
+            </a>
         </div>
     </section>
 </main>
