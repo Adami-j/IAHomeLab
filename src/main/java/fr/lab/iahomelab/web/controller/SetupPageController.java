@@ -7,6 +7,7 @@ import fr.lab.iahomelab.setup.controller.dto.SetupResponse;
 import fr.lab.iahomelab.setup.controller.dto.SetupVersionResponse;
 import fr.lab.iahomelab.setup.controller.dto.UpdateSetupRequest;
 import fr.lab.iahomelab.setup.controller.dto.UpdateSetupVersionRequest;
+import fr.lab.iahomelab.setup.entity.SetupVersionStatus;
 import fr.lab.iahomelab.setup.service.ComponentInstanceService;
 import fr.lab.iahomelab.setup.service.ConnectionService;
 import fr.lab.iahomelab.setup.service.SetupService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -60,8 +62,14 @@ public class SetupPageController {
             @PathVariable UUID setupId,
             Model model
     ) {
+        List<SetupVersionResponse> versions = setupVersionService.list(setupId);
+
         model.addAttribute("setup", setupService.getById(setupId));
-        model.addAttribute("versions", setupVersionService.list(setupId));
+        model.addAttribute("versions", versions);
+        model.addAttribute(
+                "canDeleteSetup",
+                versions.stream().noneMatch(version -> version.status() == SetupVersionStatus.FROZEN)
+        );
         return "setup/detail";
     }
 
