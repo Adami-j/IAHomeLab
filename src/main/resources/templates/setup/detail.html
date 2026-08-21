@@ -38,7 +38,7 @@
                    th:each="version : ${versions}"
                    th:href="@{/app/setups/{setupId}/versions/{versionId}(setupId=${setup.id}, versionId=${version.id})}">
                     <div>
-                        <strong th:text="|'Version ' + ${version.versionNumber}|">Version 1</strong>
+                        <strong th:text="${'Version ' + version.versionNumber}">Version 1</strong>
                         <p class="muted"
                            th:text="${version.description != null ? version.description : 'Aucune description'}">
                             Description
