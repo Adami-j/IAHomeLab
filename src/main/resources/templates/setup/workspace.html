@@ -1,28 +1,49 @@
 <!DOCTYPE html>
 <html lang="fr"
       xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout('Setup workspace', ~{::main})}">
+      th:replace="~{layouts/app :: layout(${setup.name} + ' · v' + ${version.versionNumber}, ~{::main})}">
 <main>
-    <section class="workspace-grid">
-        <div class="workspace-canvas panel">
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">Setup version</p>
-                    <h2>Graph workspace</h2>
-                </div>
-                <span class="badge">DRAFT</span>
+    <section class="page-section">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Setup workspace</p>
+                <h2 th:text="${setup.name}">Setup</h2>
             </div>
-
-            <div class="graph-placeholder">
-                Le graphe des `ComponentInstance` et `Connection` sera rendu ici.
-            </div>
+            <a class="button button-secondary" th:href="@{/app/setups/{id}(id=${setup.id})}">Versions</a>
         </div>
 
-        <aside class="workspace-inspector panel">
-            <p class="eyebrow">Inspector</p>
-            <h3>Aucun composant sélectionné</h3>
-            <p class="muted">Sélectionner un nœud permettra d'afficher et d'éditer sa configuration.</p>
-        </aside>
+        <section class="workspace-grid">
+            <div class="workspace-canvas panel">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow" th:text="|'Version ' + ${version.versionNumber}|">Version</p>
+                        <h3>Graph workspace</h3>
+                    </div>
+                    <span class="badge" th:text="${version.status}">DRAFT</span>
+                </div>
+
+                <div class="graph-placeholder" th:if="${#lists.isEmpty(components)}">
+                    Aucun composant dans cette version.
+                </div>
+
+                <div class="component-preview" th:unless="${#lists.isEmpty(components)}">
+                    <article class="component-node"
+                             th:each="component : ${components}">
+                        <span class="eyebrow" th:text="${component.type}">LLM</span>
+                        <strong th:text="${component.name}">Component</strong>
+                    </article>
+                </div>
+            </div>
+
+            <aside class="workspace-inspector panel">
+                <p class="eyebrow">Inspector</p>
+                <h3 th:text="|${#lists.size(components)} composant(s)|">0 composant</h3>
+                <p class="muted" th:text="|${#lists.size(connections)} connexion(s)|">0 connexion</p>
+                <p class="muted">
+                    Le prochain incrément UX ajoutera la sélection d'un nœud et l'édition de sa configuration.
+                </p>
+            </aside>
+        </section>
     </section>
 </main>
 </html>
